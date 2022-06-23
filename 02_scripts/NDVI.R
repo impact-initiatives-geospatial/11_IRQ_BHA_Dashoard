@@ -19,8 +19,10 @@ grid <- grid[1:10,]                                                             
 # initiatin gee -----------------------------------------------------------
 # 
 
-ee$Authenticate()
-ee$Initialize()
+# ee_clean_pyenv()
+# ee_install_set_pyenv("04_py_env/Scripts/python.exe")
+
+ee_Initialize()
 
 
 # ndvi --------------------------------------------------------------------

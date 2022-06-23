@@ -1,6 +1,7 @@
 #ignore files
 
 03_tor_dap_proposal/*
+renv/*
 
 *.RData
 *.Rhistory
@@ -9,3 +10,4 @@
 .Rproj.user
 
 !/03_tor_dap_proposal/.gitkeep
+!/renv/.gitkeep
