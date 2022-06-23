@@ -39,13 +39,13 @@ ee_Initialize(user = "Mehedi",drive = T,gcs = T)
 
 
 ##########################################################################
-
-project_id <- ee_get_earthengine_path() %>% 
-  list.files(., "\\.json$", full.names = TRUE) %>% 
-  jsonlite::read_json() %>% 
-  '$'(project_id)
-
-googleCloudStorageR::gcs_create_bucket("mh_rgee_bha", projectId = project_id)
+# 
+# project_id <- ee_get_earthengine_path() %>% 
+#   list.files(., "\\.json$", full.names = TRUE) %>% 
+#   jsonlite::read_json() %>% 
+#   '$'(project_id)
+# 
+# googleCloudStorageR::gcs_create_bucket("mh_rgee_bha", projectId = project_id)
 
 
 ############################# READING CHIRPS DATA ############################################
@@ -108,9 +108,10 @@ precipitaion_defict_processed <- precipitaion_defict %>% filter(
 
 precipitation_defict_final <- list()
 
-for ( i in nrow(grid)){
-  grid_filter <- grid[i,]
+for ( i in 1:nrow(grid)){
+grid_filter <- grid[i,]
+# 1000o is working 
 precipitation_defict_final[[i]] <- precipitaion_defict_processed %>%  
-  ee_extract_tidy(y = grid,stat = "mean",scale = 250,via = "getinfo")
+  ee_extract_tidy(y = grid_filter,stat = "mean",scale = 5500,via = "drive")
 }
 
