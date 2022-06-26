@@ -1,7 +1,7 @@
 rm(list = ls())
 
 library(reticulate)
-use_python("04_py_env/Scripts/python.exe")
+# use_python("04_py_env/Scripts/python.exe")
 
 library(reticulate)
 library(sf)
@@ -13,7 +13,7 @@ library(tidyverse)
 # read cluster ------------------------------------------------------------
 
 grid <- st_read("01_inputs/01_hexagon/cluster_10_km.shp")
-grid <- grid[1:10,]                                                              # to make things faster, temporary 
+                                                             # to make things faster, temporary 
 
 
 # initiatin gee -----------------------------------------------------------
@@ -22,7 +22,7 @@ grid <- grid[1:10,]                                                             
 # ee_clean_pyenv()
 # ee_install_set_pyenv("04_py_env/Scripts/python.exe")
 
-ee_Initialize()
+ee_Initialize(user = "Mehedi",drive = T,gcs = T)
 
 
 # ndvi --------------------------------------------------------------------
@@ -67,7 +67,7 @@ ndvi_recent_monthly <- modis_ndvi_tidy |>                                       
 ####################################################################
 
 ndvi_recent_renamed <- ndvi_recent_monthly |> 
-  select(NDVI="NDVI_mean")
+  dplyr::select(NDVI="NDVI_mean")
 
 
 ndvi_recent_and_baseline<- inner_join(x = ndvi_recent_renamed,
@@ -96,14 +96,39 @@ ndvi_z <- as_tidyee(ndvi_zscore)
 #
 ndvi_z_pre_processed <- ndvi_z |> 
   filter(year>=2022) |> 
-  select("NDVI_z_score")
+  dplyr::select("NDVI_z_score")
 
 # leaflet::leaflet(grid ) |>
 #   leaflet::addTiles() |> 
 #   leaflet::addPolygons()
 
 
+ndvi_final <- list()
 
-grid_with_ndvi <- ndvi_z_pre_processed |> 
-    ee_extract_tidy(y = grid,stat = "mean",scale = 250,via = "getinfo",)
+first_tier<-1:10000 
+second_tier <- 10001:20000
+third_tier <- 20001:30000
+fourth_tier <- 30001:40000
+fifth_tier <- 40001:43648
+
+all_tier <- c("first_tier","second_tier","third_tier","fourth_tier","fifth_tier")
+
+for ( i in all_tier){
+  
+  grid_filter <- grid[get(i),]
+  # 1000o is working 
+  ndvi_final[[i]] <- ndvi_z_pre_processed %>%  
+    ee_extract_tidy(y = grid_filter,sf = T,stat = "mean",scale = 250,via = "drive")
+}
+
+
+
+ndvi_final_bind <- do.call("bind_rows",ndvi_final)
+ndvi_final_bind <- ndvi_final_bind %>% mutate(
+  year = lubridate::year(date),
+  month = lubridate::month(date,label = T,abbr = F)
+)
+
+write.csv(ndvi_final_bind,"05_outputs/02_NDVI_Z_value/NDVI_Z_value.csv")
+
 

@@ -108,10 +108,26 @@ precipitaion_defict_processed <- precipitaion_defict %>% filter(
 
 precipitation_defict_final <- list()
 
-for ( i in 1:nrow(grid)){
-grid_filter <- grid[i,]
+first_tier<-1:10000 
+second_tier <- 10001:20000
+third_tier <- 20001:30000
+fourth_tier <- 30001:40000
+fifth_tier <- 40001:43648
+
+all_tier <- c("first_tier","second_tier","third_tier","fourth_tier","fifth_tier")
+
+for ( i in all_tier){
+
+grid_filter <- grid[get(i),]
 # 1000o is working 
 precipitation_defict_final[[i]] <- precipitaion_defict_processed %>%  
-  ee_extract_tidy(y = grid_filter,stat = "mean",scale = 5500,via = "drive")
+  ee_extract_tidy(y = grid_filter,sf = T,stat = "mean",scale = 5500,via = "drive")
 }
 
+precipitation_defic_bind <- do.call("bind_rows",precipitation_defict_final)
+precipitation_defic_bind <- precipitation_defic_bind %>% mutate(
+  year = lubridate::year(date),
+  month = lubridate::month(date,label = T,abbr = F)
+)
+
+write.csv(precipitation_defic_bind,"05_outputs/01_precipitation_defict/precipitation_deficit.csv")
