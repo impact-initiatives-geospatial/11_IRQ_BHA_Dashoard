@@ -31,7 +31,7 @@ NDVI <- read.csv("05_outputs/02_NDVI_Z_value/NDVI_Z_value.csv")
 
 
 ##### Admin boundary 
-admin_boundary_path <-  "G:\\My Drive\\01_Professional\\08_REACH_IRAQ_UPDATE\\mh1\\05_common_shapefiles\\admin_boundary"
+admin_boundary_path <-  "01_inputs/03_admin_boundary/"
 
 admin_zero <-st_read(paste0(admin_boundary_path,"/irq_admbnda_adm0_cso_itos_20190603.shp"))
 admin1_boundary  <-st_read(paste0(admin_boundary_path,"/irq_admbnda_adm1_cso_20190603.shp"))
@@ -71,9 +71,9 @@ ui <- fluidPage(
 
       mainPanel(
         br(),
-        h5(strong("This tab will give you the population data by each sub-district. Here in this tab, you have four parameters-")),
+        h5(strong("Climate change is affecting Iraq very adversely. To help the humanitarian community, REACH has developed this climate monitoring dashboard, so that the implementing agencies can work immediately wherever there is a hotspot")),
         
-        
+        hr(),
         
         ##################### input ###############################
         tags$div(pickerInput("select_climate_indicator",
@@ -93,6 +93,7 @@ ui <- fluidPage(
         ),style="display:inline-block"),
         
         actionButton("run", "Show result"), 
+        
         
         div(class = "outer", tags$style(type = "text/css", ".outer {position: fixed; top: 200px; left: 0; right: 0; bottom: 0; overflow: hidden; padding: 0}"),
         
