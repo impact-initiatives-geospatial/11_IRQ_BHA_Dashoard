@@ -18,6 +18,7 @@ library(leaflet.extras)
 library(exactextractr)
 library(stringr)
 library(htmltools)
+library(leafgl)
 
 
 # read_data ---------------------------------------------------------------
@@ -27,6 +28,7 @@ grid <- st_read("01_inputs/01_hexagon/cluster_10_km.shp") %>% st_transform(4326)
 ###### input from gee
 Precipitation <- read.csv("05_outputs/01_precipitation_defict/precipitation_deficit.csv")
 NDVI <- read.csv("05_outputs/02_NDVI_Z_value/NDVI_Z_value.csv")
+SPI <-  read.csv("05_outputs/01_precipitation_defict/nine_month_spi.csv")
 
 
 
@@ -35,8 +37,8 @@ admin_boundary_path <-  "01_inputs/03_admin_boundary/"
 
 admin_zero <-st_read(paste0(admin_boundary_path,"/irq_admbnda_adm0_cso_itos_20190603.shp"))
 admin1_boundary  <-st_read(paste0(admin_boundary_path,"/irq_admbnda_adm1_cso_20190603.shp"))
-admin2_boundary  <-st_read(paste0(admin_boundary_path,"/irq_admbnda_adm2_cso_20190603.shp"))
-admin3_boundary  <-st_read(paste0(admin_boundary_path,"/irq_admbnda_adm3_cso_20190603.shp"))
+# admin2_boundary  <-st_read(paste0(admin_boundary_path,"/irq_admbnda_adm2_cso_20190603.shp"))
+# admin3_boundary  <-st_read(paste0(admin_boundary_path,"/irq_admbnda_adm3_cso_20190603.shp"))
 
 
 
@@ -48,7 +50,7 @@ base_map <- leaflet::leaflet() %>% leaflet::addProviderTiles(leaflet::providers$
   leaflet::addPolygons(data = admin1_boundary,color = "#58585A",
                        #label = ~htmlEscape(ADM1_EN),
                        #labelOptions = labelOptions(noHide = T, textOnly = TRUE,textsize = "15px"),
-                       popup = paste("Governorate:", admin1_boundary$ADM1_EN),
+                       #popup = paste("Governorate:", admin1_boundary$ADM1_EN),
                        weight = 2,dashArray = "12",fillColor = "transparent")
 
 # ui ---------------------------------------------------------------------
@@ -68,7 +70,7 @@ ui <- fluidPage(
       windowTitle = "IRAQ CLIMATE MONITORING DASHBOARD",
       HTML('<a style="padding-left:10px;" class = "navbar-brand" href = "https://www.reach-initiative.org" target="_blank"><img src = "reach_logo.png" height = "50"></a><span class="navbar-text" style="font-size: 16px; color: #FFFFFF"><strong>IRAQ CLIMATE MONITORING DASHBOARD</strong></span>'),
       
-
+  tabPanel("Climate Indicators",
       mainPanel(
         br(),
         h5(strong("Climate change is affecting Iraq very adversely. To help the humanitarian community, REACH has developed this climate monitoring dashboard, so that the implementing agencies can work immediately wherever there is a hotspot")),
@@ -77,8 +79,8 @@ ui <- fluidPage(
         
         ##################### input ###############################
         tags$div(pickerInput("select_climate_indicator",
-                             label = "Select climate:",
-                             choices = c("Precipitation","NDVI"),
+                             label = "Select Climate Indicator:",
+                             choices = c("Precipitation","SPI","NDVI"),
                              selected = "Precipitation",
                              multiple = F,
                              options = pickerOptions(title = "Select", actionsBox = TRUE, liveSearch = TRUE)
@@ -97,11 +99,26 @@ ui <- fluidPage(
         
         div(class = "outer", tags$style(type = "text/css", ".outer {position: fixed; top: 200px; left: 0; right: 0; bottom: 0; overflow: hidden; padding: 0}"),
         
-        leafletOutput("map",width ="100%", height = "100%"))
+            leafglOutput("map",width ="100%", height = "100%"))
         
         
       ) # end main panel  
-      
+  ), # tab 1 end 
+  
+  tabPanel("JRC Surface Water",
+       mainPanel(
+
+         fluidRow(
+           shinyLP::iframe(
+             url_link = url("https://www.global-surface-water.appspot.com/map"), 
+             height = 800, width = 1200
+           )
+         )
+         
+         # htmlOutput("frame")
+       ) # end mainpanel 2   
+           
+  ) # End table 2
       ) # end navar page
 ) # end fluid page
 
@@ -139,7 +156,7 @@ server <- function(input, output,session){
   
 
 clr <- eventReactive(input$run,{
-    if(input$select_climate_indicator == "Precipitation") {
+    if(input$select_climate_indicator %in% c("Precipitation","SPI")) {
     clr <- colorQuantile("RdYlBu", grid_with_df()$value)(grid_with_df()$value)
     return(clr)
       }
@@ -152,24 +169,40 @@ clr <- eventReactive(input$run,{
   
   output$map <-  renderLeaflet({
     
-    base_map %>%  leaflet::addPolygons(data = grid_with_df(),
-                                       fillOpacity = 0.5,
-                                       smoothFactor = 0.5,
-                                       color = ~clr(),
-                                       stroke = F,
-                                       popup = paste("Row_id:", grid_with_df()$FID, "<br>",
-                                                     "Parameter:", grid_with_df()$parameter, "<br>",
-                                                     "Value:",  grid_with_df()$value)
-                                       
-    )  %>% fitBounds(lng1 = 38.78688, 
-                     lat1 =29.05777, 
-                     lng2 = 48.63298, 
-                     lat2 = 37.38891)
+    base_map %>%  leafgl::addGlPolygons(data = grid_with_df(),
+                                        fillOpacity = 0.7,
+                                        color = ~clr(),
+                                        stroke = F,
+                                        popup = paste("Row_id:", grid_with_df()$FID, "<br>",
+                                                      "Parameter:", grid_with_df()$parameter, "<br>",
+                                                      "Value:",  grid_with_df()$value)
+                                        
+    )  %>% setView(lat = 33.312805,lng = 44.361488,zoom = 6) %>% addMiniMap() %>% 
+      addSearchOSM()#%>% 
+     # addLegend(data = grid_with_df(),pal = clr(), values = ~grid_with_df()$value)
+
+    
+    
+    # base_map %>%  leaflet::addPolygons(data = grid_with_df(),
+    #                                     fillOpacity = 0.5,
+    #                                     smoothFactor = 0.5,
+    #                                     color = ~clr(),
+    #                                     stroke = F,
+    #                                     popup = paste("Row_id:", grid_with_df()$FID, "<br>",
+    #                                                   "Parameter:", grid_with_df()$parameter, "<br>",
+    #                                                   "Value:",  grid_with_df()$value)
+    #                                     
+    # )  %>% fitBounds(lng1 = 38.78688, 
+    #                  lat1 =29.05777, 
+    #                  lng2 = 48.63298, 
+    #                  lat2 = 37.38891)
     
   })
   
     
-  
+  # output$frame <- renderUI({
+  # tags$iframe(url_link="https://global-surface-water.appspot.com/map",  height=800,width=1200,frameborder="no")
+  # })
 }
 
 
