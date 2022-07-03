@@ -4,19 +4,12 @@ rm(list = ls())
 
 
 library(shiny)
-library(shinydashboard)
+library(shinyWidgets)
+library(shinybrowser)
 library(leaflet)
 library(sf)
 library(dplyr)
-library(shinythemes)
-library(shinyWidgets)
-library(DT)
-library(rgdal)
-library(zip)
-library(raster)
 library(leaflet.extras)
-library(exactextractr)
-library(stringr)
 library(htmltools)
 library(leafgl)
 
@@ -29,7 +22,7 @@ grid <- st_read("01_inputs/01_hexagon/cluster_10_km.shp") %>% st_transform(4326)
 Precipitation <- read.csv("05_outputs/01_precipitation_defict/precipitation_deficit.csv")
 NDVI <- read.csv("05_outputs/02_NDVI_Z_value/NDVI_Z_value.csv")
 SPI <-  read.csv("05_outputs/01_precipitation_defict/nine_month_spi.csv")
-
+Temperature <- read.csv("05_outputs/04_temperature_Z_value/temperature_Z_value.csv")
 
 
 ##### Admin boundary 
@@ -80,7 +73,7 @@ ui <- fluidPage(
         ##################### input ###############################
         tags$div(pickerInput("select_climate_indicator",
                              label = "Select Climate Indicator:",
-                             choices = c("Precipitation","SPI","NDVI"),
+                             choices = c("Precipitation","SPI","NDVI","Temperature"),
                              selected = "Precipitation",
                              multiple = F,
                              options = pickerOptions(title = "Select", actionsBox = TRUE, liveSearch = TRUE)
@@ -105,17 +98,11 @@ ui <- fluidPage(
       ) # end main panel  
   ), # tab 1 end 
   
-  tabPanel("JRC Surface Water",
+  tabPanel("Global Surface Water",
        mainPanel(
 
-         fluidRow(
-           shinyLP::iframe(
-             url_link = url("https://www.global-surface-water.appspot.com/map"), 
-             height = 800, width = 1200
-           )
-         )
-         
-         # htmlOutput("frame")
+         htmlOutput("frame"),
+         em("Source: Joint Research Centre (JRC)"),
        ) # end mainpanel 2   
            
   ) # End table 2
@@ -156,7 +143,7 @@ server <- function(input, output,session){
   
 
 clr <- eventReactive(input$run,{
-    if(input$select_climate_indicator %in% c("Precipitation","SPI")) {
+    if(input$select_climate_indicator %in% c("Precipitation","SPI","Temperature")) {
     clr <- colorQuantile("RdYlBu", grid_with_df()$value)(grid_with_df()$value)
     return(clr)
       }
@@ -199,10 +186,11 @@ clr <- eventReactive(input$run,{
     
   })
   
+   frame <- tags$iframe(src="https://global-surface-water.appspot.com/map", style="height: 100vh;",scrolling = 'no',width="150%", frameborder = "0")
     
-  # output$frame <- renderUI({
-  # tags$iframe(url_link="https://global-surface-water.appspot.com/map",  height=800,width=1200,frameborder="no")
-  # })
+    output$frame <- renderUI({
+     frame
+      })
 }
 
 
