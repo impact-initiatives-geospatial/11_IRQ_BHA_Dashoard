@@ -143,11 +143,11 @@ server <- function(input, output,session){
   
 
 clr <- eventReactive(input$run,{
-    if(input$select_climate_indicator %in% c("Precipitation","SPI","Temperature")) {
+    if(input$select_climate_indicator %in% c("Precipitation","SPI")) {
     clr <- colorQuantile("RdYlBu", grid_with_df()$value)(grid_with_df()$value)
     return(clr)
       }
-    if(input$select_climate_indicator == "NDVI") {
+    if(input$select_climate_indicator %in%  c("Temperature","NDVI")) {
       clr <- colorQuantile("RdYlGn", grid_with_df()$value)(grid_with_df()$value)
       return(clr)
     }
