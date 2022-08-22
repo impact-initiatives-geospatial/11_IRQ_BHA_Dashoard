@@ -130,6 +130,6 @@ ndWi_final_bind <- ndWi_final_bind %>% mutate(
   month = lubridate::month(date,label = T,abbr = F)
 )
 
-write.csv(ndWi_final_bind,"05_outputs/03_NDWI_Z_value//NDWI_Z_value.csv")
+write.csv(ndWi_final_bind,"05_outputs/03_NDWI_Z_value/NDWI_Z_value.csv")
 
 

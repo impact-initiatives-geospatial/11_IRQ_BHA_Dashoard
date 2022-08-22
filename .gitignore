@@ -1,6 +1,7 @@
 #ignore files
 
 03_tor_dap_proposal/*
+06_ACF_model/*
 renv/*
 
 *.RData

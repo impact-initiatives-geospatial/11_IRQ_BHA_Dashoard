@@ -5,10 +5,10 @@ account: mhkhan
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 6553130
-bundleId: 6065645
+bundleId: 6222823
 url: https://mhkhan.shinyapps.io/11_IRQ_BHA_Dashoard/
-when: 1656858184.14639
-lastSyncTime: 1656858184.1464
+when: 1661091917.82136
+lastSyncTime: 1661091917.82137
 asMultiple: FALSE
 asStatic: FALSE
-ignoredFiles: 03_tor_dap_proposal|04_py_env
+ignoredFiles: 06_ACF_model/OneDrive_1_7-20-2022/Annex H Modelling monthly operation policy for the Mosul.pdf|06_ACF_model/OneDrive_1_7-20-2022/Appendices (A-B-C-D).xlsx|06_ACF_model/OneDrive_1_7-20-2022/Appendix of Water Scarcity Index (E-F-G).xlsx|06_ACF_model/OneDrive_1_7-20-2022/Report of Water Scarcity Index_ACF and UoM_June 22.docx|06_ACF_model/OneDrive_1_7-20-2022.zip|app3.R|03_tor_dap_proposal|04_py_env
